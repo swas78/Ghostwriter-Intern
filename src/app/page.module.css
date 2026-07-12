@@ -1,0 +1,116 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: var(--text-graphite);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--text-graphite-light);
+  font-size: 1.1rem;
+}
+
+.inputSection {
+  background: var(--bg-paper-elevated);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 3rem;
+  position: relative;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.inputSection:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-md);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  border: none;
+  resize: none;
+  font-size: 1.1rem;
+  color: var(--text-graphite);
+  background: transparent;
+  outline: none;
+  line-height: 1.6;
+}
+
+.textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.inputFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.recordBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-graphite-light);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.recordBtn:hover {
+  color: var(--text-graphite);
+}
+
+.recordIcon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #e55039;
+  display: inline-block;
+}
+.recording .recordIcon {
+  animation: pulse-opacity 1.5s infinite ease-in-out;
+}
+
+.submitBtn {
+  background: var(--accent-ink);
+  color: white;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover {
+  background: var(--accent-ink-hover);
+}
+
+.queueSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.queueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.queueTitle {
+  font-size: 1.25rem;
+  color: var(--text-graphite-light);
+}
