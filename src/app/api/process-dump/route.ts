@@ -2,9 +2,14 @@ import { NextRequest } from 'next/server';
 import OpenAI from 'openai';
 import { parseJson } from '@/utils/parseJson';
 
-const openai = new OpenAI({
-  baseURL: 'https://api.meshapi.ai/v1',
-  apiKey: process.env.MESH_API_KEY || 'dummy_key',
+const groqClient = new OpenAI({
+  baseURL: 'https://api.groq.com/openai/v1',
+  apiKey: process.env.GROQ_API_KEY || 'dummy_groq_key',
+});
+
+const geminiClient = new OpenAI({
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+  apiKey: process.env.GEMINI_API_KEY || 'dummy_gemini_key',
 });
 
 function timeoutSignal(ms: number) {
@@ -13,12 +18,17 @@ function timeoutSignal(ms: number) {
   return controller.signal;
 }
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
 export async function POST(req: NextRequest) {
-  const { text } = await req.json();
+  const { text, simulateError } = await req.json();
 
   if (!text) {
     return new Response('Missing text', { status: 400 });
   }
+
+  const isMockMode = process.env.USE_MOCK_API === 'true';
+  const forceError = (text.includes('force_error') || simulateError) && process.env.NODE_ENV !== 'production';
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -28,14 +38,69 @@ export async function POST(req: NextRequest) {
       };
 
       try {
-        // 1. EXTRACT
-        const extractRes = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+        let actionableItems: any[] = [];
+        let overflow = 0;
+
+        if (isMockMode && !process.env.SIMULATE_PARSE_FAILURE) {
+          // Simulate latency
+          await sleep(1000);
+          
+          if (text.includes("milk, text Sarah")) {
+            actionableItems = [
+              { id: '1', recipient: 'Sarah', intent: 'dinner', relationship_context: 'friend, casual', is_actionable: true, urgency: 5 },
+              { id: '2', recipient: 'plumber', intent: 'call them', relationship_context: 'professional, direct', is_actionable: true, urgency: 4 }
+            ];
+          } else if (text.includes("CEO")) {
+            actionableItems = [
+              { id: '1', recipient: 'John the CEO', intent: 'submit Q3 report by Friday', relationship_context: 'highly professional, formal', is_actionable: true, urgency: 5 },
+              { id: '2', recipient: 'brother Mike', intent: 'submit Q3 report by Friday', relationship_context: 'informal, family', is_actionable: true, urgency: 2 }
+            ];
+          } else if (text.includes("person10")) {
+            // Overflow test
+            for (let i = 0; i < 12; i++) {
+              actionableItems.push({ id: `${i}`, recipient: `Person ${i}`, intent: 'task', relationship_context: 'casual', is_actionable: true, urgency: 3 });
+            }
+          } else {
+            actionableItems = [
+              { id: '1', recipient: 'Unknown', intent: 'process dump', relationship_context: 'neutral', is_actionable: true, urgency: 3 }
+            ];
+          }
+
+          if (actionableItems.length > 8) {
+            overflow = actionableItems.length - 8;
+            actionableItems = actionableItems.slice(0, 8);
+          }
+          
+          sendEvent('extracted', { items: actionableItems, overflow });
+          
+          const draftPromises = actionableItems.map(async (task) => {
+            await sleep(1500 + Math.random() * 1000);
+            if (forceError && task.id === '1') {
+              sendEvent('draft_error', { id: task.id, error: 'Draft timed out or JSON parsing failed twice' });
+              return;
+            }
+            sendEvent('drafted', {
+              id: task.id,
+              draft: `[MOCK DRAFT] Hey ${task.recipient}, just following up on: ${task.intent}.`,
+              toneLabel: task.relationship_context.split(',')[0],
+              confidence: 'high'
+            });
+          });
+          
+          await Promise.allSettled(draftPromises);
+          controller.close();
+          return;
+        }
+
+        // --- REAL API EXECUTION BELOW ---
+        // 1. EXTRACT via Groq
+        const extractRes = await groqClient.chat.completions.create({
+          model: 'llama-3.1-8b-instant',
           messages: [
             {
               role: 'system',
               content: `You are an extraction assistant. Extract actionable communication tasks from the user's messy brain dump.
-Return a JSON array of objects. Each object must have:
+Return ONLY a JSON array of objects. Each object must have:
 - id: a unique string ID
 - recipient: string (name or descriptor)
 - intent: string (raw intent of the message)
@@ -46,8 +111,7 @@ Example output:
 [
   { "id": "1", "recipient": "Priya", "intent": "reply about invoice", "relationship_context": "professional, familiar", "is_actionable": true },
   { "id": "2", "recipient": "Self", "intent": "buy milk", "relationship_context": "none", "is_actionable": false }
-]
-Output ONLY raw JSON.`
+]`
             },
             { role: 'user', content: text }
           ],
@@ -62,9 +126,8 @@ Output ONLY raw JSON.`
           extractedItems = [];
         }
 
-        let actionableItems = extractedItems.filter(item => item.is_actionable);
+        actionableItems = extractedItems.filter(item => item.is_actionable);
         
-        let overflow = 0;
         if (actionableItems.length > 8) {
           overflow = actionableItems.length - 8;
           actionableItems = actionableItems.slice(0, 8);
@@ -76,14 +139,14 @@ Output ONLY raw JSON.`
           return;
         }
 
-        // 2. RANK
-        const rankRes = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
+        // 2. RANK via Groq
+        const rankRes = await groqClient.chat.completions.create({
+          model: 'llama-3.1-8b-instant',
           messages: [
             {
               role: 'system',
               content: `You are an urgency ranking assistant. Given a JSON array of communication tasks, assign an urgency score from 1 (low) to 5 (high) to each.
-Return a JSON object mapping the task ID to its integer score. Output ONLY raw JSON.`
+Return ONLY a JSON object mapping the task ID to its integer score.`
             },
             { role: 'user', content: JSON.stringify(actionableItems) }
           ],
@@ -106,35 +169,44 @@ Return a JSON object mapping the task ID to its integer score. Output ONLY raw J
         // Send extracted + ranked items to UI immediately
         sendEvent('extracted', { items: actionableItems, overflow });
 
-        // 3. DRAFT (in parallel)
+        // 3. DRAFT via Gemini (in parallel for now, until Section 3 refactoring)
         const draftPromises = actionableItems.map(async (task) => {
           let retryCount = 0;
           let success = false;
           
           while (!success && retryCount < 2) {
             try {
-              const draftRes = await openai.chat.completions.create({
-                model: 'claude-3-5-sonnet-20240620',
-                messages: [
-                  {
-                    role: 'system',
-                    content: `You are an expert ghostwriter. Draft a message based on the user's intent. 
+              let draftContent = '';
+
+              if (simulateError && process.env.NODE_ENV !== 'production' && task.id === actionableItems[0].id) {
+                 // Dev override to simulate a broken JSON string
+                 draftContent = '{ "message": "This JSON is deliberately broken';
+              } else {
+                 const draftRes = await geminiClient.chat.completions.create({
+                    model: 'gemini-2.5-flash',
+                    messages: [
+                      {
+                        role: 'system',
+                        content: `You are an expert ghostwriter. Draft a message based on the user's intent. 
 Write ONLY the message body, no subject line, no pleasantries around the output. 
 Match the tone to the relationship_context.
 Also provide a tone_label and a confidence level (high or low).
-Output a JSON object: { "message": "...", "tone_label": "...", "confidence": "high|low" }`
-                  },
-                  {
-                    role: 'user',
-                    content: `Recipient: ${task.recipient}\nIntent: ${task.intent}\nRelationship: ${task.relationship_context}`
-                  }
-                ],
-                temperature: 0.7
-              }, { signal: timeoutSignal(20000) }); // 20s timeout
+Output ONLY a JSON object: { "message": "...", "tone_label": "...", "confidence": "high|low" }`
+                      },
+                      {
+                        role: 'user',
+                        content: `Recipient: ${task.recipient}\nIntent: ${task.intent}\nRelationship: ${task.relationship_context}`
+                      }
+                    ],
+                    temperature: 0.7
+                  }, { signal: timeoutSignal(20000) }); // 20s timeout
+
+                  draftContent = draftRes.choices[0].message.content || '{}';
+              }
 
               let draftData;
               try {
-                draftData = parseJson<any>(draftRes.choices[0].message.content || '{}');
+                draftData = parseJson<any>(draftContent);
                 sendEvent('drafted', {
                   id: task.id,
                   draft: draftData.message,

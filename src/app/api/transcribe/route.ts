@@ -1,34 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  baseURL: 'https://api.meshapi.ai/v1',
-  apiKey: process.env.MESH_API_KEY || 'dummy_key',
+const groqClient = new OpenAI({
+  baseURL: 'https://api.groq.com/openai/v1',
+  apiKey: process.env.GROQ_API_KEY || 'dummy_groq_key',
 });
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file') as Blob;
-    
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    const isMockMode = process.env.USE_MOCK_API === 'true';
+
+    if (isMockMode) {
+      await sleep(1500);
+      return NextResponse.json({ text: "remind me to buy milk, text Sarah about dinner, and call the plumber" });
     }
 
-    // Convert the Blob to an ArrayBuffer, then to a Buffer
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const formData = await req.formData();
+    const file = formData.get('file') as File;
     
-    // Create a native File object (available in Node >= 20, which Next.js App Router uses)
-    const audioFile = new File([fileBuffer], 'audio.webm', { type: file.type || 'audio/webm' });
+    if (!file) {
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    }
 
-    const response = await openai.audio.transcriptions.create({
+    // Convert WebM/Opus File object into a buffer or stream that OpenAI SDK can accept
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    // We need to pass a File-like object to the SDK
+    const audioFile = new File([buffer], file.name || 'audio.webm', { type: file.type || 'audio/webm' });
+
+    const response = await groqClient.audio.transcriptions.create({
       file: audioFile,
-      model: 'whisper-1',
+      model: 'whisper-large-v3',
     });
 
     return NextResponse.json({ text: response.text });
   } catch (error: any) {
-    console.error("Transcription error", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Transcription error:', error);
+    return NextResponse.json({ error: error.message || 'Transcription failed' }, { status: 500 });
   }
 }
