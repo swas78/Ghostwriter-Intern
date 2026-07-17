@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ghostwriter Voice Capture Options</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 32px;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+      background: #fafafa;
+    }
+    .card {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    p {
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    button {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+    .status {
+      margin-top: 16px;
+      font-weight: bold;
+    }
+    .success {
+      color: #27ae60;
+    }
+    .error {
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Microphone Permission</h1>
+    <p>To use voice dictation from any webpage, Ghostwriter needs permission to access your microphone. Click the button below to grant permission. Once granted, you can safely close this page.</p>
+    <button id="grantBtn">Grant Microphone Access</button>
+    <div id="statusMsg" class="status"></div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

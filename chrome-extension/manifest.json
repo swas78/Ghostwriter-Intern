@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Ghostwriter Voice Capture",
+  "version": "1.0.0",
+  "description": "Fast-capture voice dictation to your Ghostwriter Intern inbox from any webpage.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "https://ghostwriter-intern-production.up.railway.app/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "capture-voice": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "Start/Stop Voice Capture"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "action": {}
+}

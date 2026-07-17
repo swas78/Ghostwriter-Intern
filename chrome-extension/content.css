@@ -1,0 +1,64 @@
+.gw-pill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647; /* Max z-index */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 30px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+  pointer-events: none; /* So it doesn't block clicks */
+}
+
+.gw-pill.gw-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.gw-pill.gw-error {
+  background-color: #d63031;
+}
+
+.gw-icon-container {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gw-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 20px;
+}
+
+.gw-bar {
+  width: 3px;
+  background-color: #74b9ff;
+  border-radius: 3px;
+  min-height: 4px;
+  transition: height 0.05s ease;
+}
+
+.gw-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: gw-spin 1s ease-in-out infinite;
+}
+
+@keyframes gw-spin {
+  to { transform: rotate(360deg); }
+}
