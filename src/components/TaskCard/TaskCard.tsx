@@ -8,7 +8,7 @@ export interface Task {
   recipient: string;
   intent: string;
   urgency: number; // 1-5
-  status: 'extracting' | 'drafting' | 'ready' | 'error';
+  status: 'extracting' | 'drafting' | 'drafted' | 'error';
   draft?: string;
   toneLabel?: string;
   confidence?: 'high' | 'low';
@@ -108,7 +108,7 @@ export function TaskCard({ task, onArchive, onRetry, onRefine, onDismiss }: Task
         )}
       </div>
 
-      {task.status === 'ready' || task.status === 'drafted' ? (
+      {task.status === 'drafted' ? (
         <>
           <div className={styles.meta}>
             {task.toneLabel && (
@@ -123,7 +123,7 @@ export function TaskCard({ task, onArchive, onRetry, onRefine, onDismiss }: Task
           </div>
           
           {/* Refinement Area */}
-          {!isApproved && !isEditing && task.status !== 'drafting' && (
+          {!isApproved && !isEditing && (
             <div className={styles.refineArea}>
               <input 
                 type="text" 

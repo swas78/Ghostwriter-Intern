@@ -122,7 +122,7 @@ export default function Home() {
       if (data.tasks) {
         setTasks(data.tasks.map((t: any) => ({
           ...t,
-          status: t.status === 'drafted' ? 'ready' : (t.status === 'pending' ? 'drafting' : t.status),
+          status: t.status === 'drafted' ? 'drafted' : (t.status === 'pending' ? 'drafting' : t.status),
           isFollowUp: t.archived === 1
         })));
         
@@ -198,7 +198,7 @@ export default function Home() {
       setTasks(prev => prev.map(t => 
         t.id === id ? { 
           ...t, 
-          status: draftData.status === 'error' ? 'error' : 'ready', 
+          status: draftData.status === 'error' ? 'error' : 'drafted', 
           draft: draftData.draft, 
           toneLabel: draftData.toneLabel, 
           confidence: draftData.confidence 
@@ -226,8 +226,8 @@ export default function Home() {
       const draftData = await draftRes.json();
       
       if (!draftRes.ok) {
-        // Fallback to ready (last known good draft) without overwriting
-        setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'ready' } : t));
+        // Fallback to drafted (last known good draft) without overwriting
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'drafted' } : t));
         alert(draftData.error || 'Refinement failed.');
         return;
       }
@@ -236,15 +236,15 @@ export default function Home() {
       setTasks(prev => prev.map(t => 
         t.id === id ? { 
           ...t, 
-          status: draftData.status === 'error' ? 'error' : 'ready', 
+          status: draftData.status === 'error' ? 'error' : 'drafted', 
           draft: draftData.draft, 
           toneLabel: draftData.toneLabel, 
           confidence: draftData.confidence 
         } : t
       ));
     } catch (e) {
-      // Network error, fallback to ready
-      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'ready' } : t));
+      // Network error, fallback to drafted
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'drafted' } : t));
       alert('Network error during refinement.');
     }
   };
@@ -273,7 +273,7 @@ export default function Home() {
         setTasks(prev => prev.map(t => 
           t.id === item.id ? { 
             ...t, 
-            status: draftData.status === 'error' ? 'error' : 'ready', 
+            status: draftData.status === 'error' ? 'error' : 'drafted', 
             draft: draftData.draft, 
             toneLabel: draftData.toneLabel, 
             confidence: draftData.confidence 
@@ -343,7 +343,7 @@ export default function Home() {
       setTasks(prev => prev.map(t => 
         t.id === data.id ? { 
           ...t, 
-          status: 'ready', 
+          status: 'drafted', 
           draft: data.draft, 
           toneLabel: data.toneLabel, 
           confidence: data.confidence 
@@ -430,7 +430,7 @@ export default function Home() {
               {isProcessing && queueTasks.length === 0 ? 'Reading through your day...' : 'Approval Queue'}
             </h2>
             {queueTasks.length > 0 && (
-              <span className={styles.queueCount}>{queueTasks.filter(t => t.status === 'ready').length} ready</span>
+              <span className={styles.queueCount}>{queueTasks.filter(t => t.status === 'drafted').length} ready</span>
             )}
           </div>
           
