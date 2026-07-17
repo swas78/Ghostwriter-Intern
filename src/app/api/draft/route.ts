@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import { parseJson } from '@/utils/parseJson';
 
 const geminiClient = new OpenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+  apiKey: process.env.GEMINI_API_KEY || 'dummy_key',
   baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 });
 

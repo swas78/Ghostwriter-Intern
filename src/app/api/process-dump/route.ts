@@ -4,7 +4,7 @@ import { parseJson } from '@/utils/parseJson';
 
 const groqClient = new OpenAI({
   baseURL: 'https://api.groq.com/openai/v1',
-  apiKey: process.env.GROQ_API_KEY || 'dummy_groq_key',
+  apiKey: process.env.GROQ_API_KEY || 'dummy_key',
 });
 
 export async function POST(req: NextRequest) {

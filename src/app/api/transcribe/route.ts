@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const groqClient = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY || 'dummy_key',
   baseURL: 'https://api.groq.com/openai/v1',
-  apiKey: process.env.GROQ_API_KEY || 'dummy_groq_key',
 });
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
