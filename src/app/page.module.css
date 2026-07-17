@@ -114,3 +114,41 @@
   font-size: 1.25rem;
   color: var(--text-graphite-light);
 }
+
+.emptyStatePrompt {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--text-graphite);
+}
+
+.streakBadge {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-paper-elevated);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-graphite);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.streakBadge:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.inputShortcutHint {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}

@@ -12,6 +12,31 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [streak, setStreak] = useState(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const mainInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Auto-focus on mount
+    mainInputRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check Cmd+K (Mac) or Ctrl+K (Windows)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        const active = document.activeElement;
+        // Don't steal focus if they are already in an input/textarea somewhere else
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)) {
+          if (active !== mainInputRef.current) {
+            return;
+          }
+        }
+        
+        e.preventDefault();
+        mainInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const getLocalToday = () => {
     const d = new Date();
@@ -361,20 +386,28 @@ export default function Home() {
 
   return (
     <main className={styles.container}>
+      <div className={styles.streakBadge}>
+        <span style={{ fontSize: '1.2rem' }}>🔥</span>
+        <strong style={{ fontSize: '1.1rem' }}>{streak}</strong>
+        <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>day streak</span>
+      </div>
+
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Ghostwriter Intern</h1>
           <p className={styles.subtitle}>Say your day out loud. Wake up to a done inbox.</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-paper-elevated)', padding: '6px 12px', borderRadius: '20px', border: '1px solid var(--border-subtle)', color: 'var(--text-graphite)' }}>
-          <span style={{ fontSize: '1.2rem' }}>🔥</span>
-          <strong style={{ fontSize: '1.1rem' }}>{streak}</strong>
-          <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>day streak</span>
-        </div>
       </header>
 
       <section className={styles.inputSection}>
+        {tasks.length === 0 && !isProcessing && (
+          <div className={styles.emptyStatePrompt}>
+            Anything on your mind today?
+          </div>
+        )}
+        <div className={styles.inputShortcutHint}>⌘K / Ctrl+K</div>
         <textarea
+          ref={mainInputRef}
           className={styles.textarea}
           placeholder="Say your day out loud, or paste the mess here..."
           value={inputText}
