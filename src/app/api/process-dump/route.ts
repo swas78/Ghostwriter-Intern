@@ -23,21 +23,22 @@ export async function POST(req: NextRequest) {
           role: 'system',
           content: `You are an extraction assistant. Extract actionable communication tasks from the user's messy brain dump.
 CRITICAL RULES:
-1. The user's input is a brain dump. Distinct thoughts, sentences, or names are often completely unrelated.
-2. DO NOT combine separate tasks. For example, if the input is "Buy groceries. Email Sarah.", these are TWO independent tasks. Do not hallucinate that the email is about groceries.
-3. Treat each sentence or phrase as its own distinct item unless explicitly connected.
+1. The user's input is a brain dump. Distinct thoughts, sentences, or names are often completely unrelated. DO NOT combine separate tasks (e.g. "Buy groceries. Email Sarah." = TWO independent tasks. Do not assume the email is about groceries).
+2. DEFINITION OF ACTIONABLE: \`is_actionable\` MUST be \`true\` ONLY if the task requires drafting a written message (email, text, slack, etc.) to a specific person.
+3. If a task is a general chore, a physical action, or something that doesn't involve drafting a message to someone (e.g., "buy groceries", "do laundry", "go to the bank"), set \`is_actionable: false\` and recipient as "Self" or "None". 
+4. A phone call ("call mom") CAN be actionable if it implies sending a message to schedule the call, but a chore ("buy milk") NEVER is.
 
 Return ONLY a JSON array of objects. Each object must have:
 - id: a unique string ID
 - recipient: string (name or descriptor, but if ambiguous or just 'him/her/them', output 'unclear')
 - intent: string (intent of the message, including any mentioned deadlines, timing, or urgency keywords)
 - relationship_context: string (must be exactly one of: "professional", "casual", "family", "unknown")
-- is_actionable: boolean (true if it's a communication task that requires drafting, false if it's just a reminder/venting)
+- is_actionable: boolean (true ONLY if it's a communication task that requires drafting a message to a specific person)
 
 Example output:
 [
   { "id": "1", "recipient": "Priya", "intent": "reply about invoice ASAP", "relationship_context": "professional", "is_actionable": true },
-  { "id": "2", "recipient": "Self", "intent": "buy milk by tonight", "relationship_context": "none", "is_actionable": false }
+  { "id": "2", "recipient": "Self", "intent": "buy milk by tonight", "relationship_context": "unknown", "is_actionable": false }
 ]`
         },
         { role: 'user', content: text }
