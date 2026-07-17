@@ -1,8 +1,14 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 
+import fs from 'fs';
+
 // Create or open the SQLite database
 const dbPath = process.env.DB_PATH || path.resolve(process.cwd(), 'data.db');
+const dir = path.dirname(dbPath);
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir, { recursive: true });
+}
 const db = new Database(dbPath);
 
 // Enable WAL mode for better concurrency and performance
