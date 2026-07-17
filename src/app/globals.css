@@ -1,25 +1,26 @@
 :root {
-  /* Graphite and Paper Theme */
-  --bg-paper: #f9f9f8;
-  --bg-paper-elevated: #ffffff;
-  --text-graphite: #2a2a2a;
-  --text-graphite-light: #5a5a5a;
-  --text-muted: #8e8e8e;
+  /* Modern Glass & Ink Theme */
+  --bg-paper: #f4f6f8;
+  --bg-paper-elevated: rgba(255, 255, 255, 0.75);
+  --text-graphite: #0f172a;
+  --text-graphite-light: #475569;
+  --text-muted: #94a3b8;
   
-  --accent-ink: #2b5c8f;
-  --accent-ink-hover: #1f4268;
-  --accent-green: #3a8b5a;
+  --accent-ink: #3b82f6;
+  --accent-ink-hover: #2563eb;
+  --accent-green: #10b981;
+  --accent-orange: #f59e0b;
   
-  --border-subtle: #e6e6e4;
-  --border-focus: #c2c2c0;
+  --border-subtle: rgba(226, 232, 240, 0.8);
+  --border-focus: rgba(148, 163, 184, 0.5);
 
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-  --shadow-float: 0 12px 24px rgba(0,0,0,0.12);
+  --shadow-sm: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  --shadow-float: 0 20px 35px -10px rgba(15, 23, 42, 0.12);
   
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
 /* Base Reset */
@@ -35,17 +36,18 @@ html, body {
 
 body {
   background-color: var(--bg-paper);
+  background-image: radial-gradient(at 0% 0%, rgba(219,234,254,0.4) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(252,231,243,0.3) 0px, transparent 50%);
   color: var(--text-graphite);
-  font-family: var(--font-inter), sans-serif;
-  line-height: 1.5;
+  font-family: var(--font-jakarta), sans-serif;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-lora), serif;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
 .handwriting {

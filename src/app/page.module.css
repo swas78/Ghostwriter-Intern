@@ -10,30 +10,38 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   color: var(--text-graphite);
   margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #0f172a, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .subtitle {
   color: var(--text-graphite-light);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 500;
 }
 
 .inputSection {
   background: var(--bg-paper-elevated);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-sm);
   margin-bottom: 3rem;
   position: relative;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .inputSection:focus-within {
   border-color: var(--border-focus);
   box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .textarea {
@@ -41,7 +49,7 @@
   min-height: 120px;
   border: none;
   resize: none;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   color: var(--text-graphite);
   background: transparent;
   outline: none;
@@ -86,16 +94,19 @@
 }
 
 .submitBtn {
-  background: var(--accent-ink);
+  background: linear-gradient(135deg, var(--accent-ink), #60a5fa);
   color: white;
-  padding: 0.6rem 1.25rem;
+  padding: 0.6rem 1.5rem;
   border-radius: var(--radius-md);
-  font-weight: 500;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  border: none;
 }
 
 .submitBtn:hover {
-  background: var(--accent-ink-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 .queueSection {
@@ -129,19 +140,23 @@
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--bg-paper-elevated);
-  padding: 6px 12px;
-  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 24px;
   border: 1px solid var(--border-subtle);
   color: var(--text-graphite);
+  font-weight: 600;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .streakBadge:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  border-color: var(--accent-orange);
 }
 
 .inputShortcutHint {
