@@ -16,7 +16,10 @@ export async function GET(req: NextRequest) {
     let stmt;
     if (localToday) {
       stmt = db.prepare(`
-        SELECT * FROM tasks 
+        SELECT id, dump_id, recipient, intent, task_type, relationship_context,
+               is_actionable, urgency, draft, toneLabel, confidence,
+               status, archived, follow_up_date, created_at, updated_at
+        FROM tasks 
         WHERE archived = 0 
            OR (archived = 1 AND follow_up_date <= @localToday AND follow_up_dismissed = 0)
         ORDER BY 
@@ -27,7 +30,10 @@ export async function GET(req: NextRequest) {
       var tasks = stmt.all({ localToday });
     } else {
       stmt = db.prepare(`
-        SELECT * FROM tasks 
+        SELECT id, dump_id, recipient, intent, task_type, relationship_context,
+               is_actionable, urgency, draft, toneLabel, confidence,
+               status, archived, follow_up_date, created_at, updated_at
+        FROM tasks 
         WHERE archived = 0 
         ORDER BY urgency DESC, created_at DESC
       `);

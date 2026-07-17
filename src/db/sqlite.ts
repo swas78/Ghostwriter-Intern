@@ -47,6 +47,12 @@ try {
   if (!err.message.includes('duplicate column name')) console.warn(err);
 }
 
+try {
+  db.exec("ALTER TABLE tasks ADD COLUMN task_type TEXT DEFAULT 'communication';");
+} catch (err: any) {
+  if (!err.message.includes('duplicate column name')) console.warn(err);
+}
+
 // Create daily_activity table for streak tracking
 db.exec(`
   CREATE TABLE IF NOT EXISTS daily_activity (

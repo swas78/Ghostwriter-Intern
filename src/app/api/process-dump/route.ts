@@ -21,24 +21,25 @@ export async function POST(req: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `You are an extraction assistant. Extract actionable communication tasks from the user's messy brain dump.
+          content: `You are an extraction assistant. Extract all actionable tasks from the user's messy brain dump.
 CRITICAL RULES:
 1. The user's input is a brain dump. Distinct thoughts, sentences, or names are often completely unrelated. DO NOT combine separate tasks (e.g. "Buy groceries. Email Sarah." = TWO independent tasks. Do not assume the email is about groceries).
-2. DEFINITION OF ACTIONABLE: \`is_actionable\` MUST be \`true\` ONLY if the task requires drafting a written message (email, text, slack, etc.) to a specific person.
-3. If a task is a general chore, a physical action, or something that doesn't involve drafting a message to someone (e.g., "buy groceries", "do laundry", "go to the bank"), set \`is_actionable: false\` and recipient as "Self" or "None". 
-4. A phone call ("call mom") CAN be actionable if it implies sending a message to schedule the call, but a chore ("buy milk") NEVER is.
+2. You must classify each task into a \`task_type\`. Valid types are: "communication" (drafting a message), "chore" (general to-do, physical action, or solo task), "meeting" (scheduling or attending).
+3. Set \`is_actionable: true\` for ALL extracted tasks (we now support all tasks).
 
 Return ONLY a JSON array of objects. Each object must have:
 - id: a unique string ID
-- recipient: string (name or descriptor, but if ambiguous or just 'him/her/them', output 'unclear')
-- intent: string (intent of the message, including any mentioned deadlines, timing, or urgency keywords)
+- recipient: string (name/descriptor for communication, or "Self"/"None" for chores/meetings)
+- intent: string (intent of the task, including any mentioned deadlines, timing, or urgency keywords)
+- task_type: string ("communication", "chore", or "meeting")
 - relationship_context: string (must be exactly one of: "professional", "casual", "family", "unknown")
-- is_actionable: boolean (true ONLY if it's a communication task that requires drafting a message to a specific person)
+- is_actionable: boolean (always true)
 
 Example output:
 [
-  { "id": "1", "recipient": "Priya", "intent": "reply about invoice ASAP", "relationship_context": "professional", "is_actionable": true },
-  { "id": "2", "recipient": "Self", "intent": "buy milk by tonight", "relationship_context": "unknown", "is_actionable": false }
+  { "id": "1", "recipient": "Priya", "intent": "reply about invoice ASAP", "task_type": "communication", "relationship_context": "professional", "is_actionable": true },
+  { "id": "2", "recipient": "Self", "intent": "buy milk by tonight", "task_type": "chore", "relationship_context": "unknown", "is_actionable": true },
+  { "id": "3", "recipient": "Self", "intent": "meet with John tomorrow at 11am", "task_type": "meeting", "relationship_context": "professional", "is_actionable": true }
 ]`
         },
         { role: 'user', content: text }
@@ -127,6 +128,7 @@ Return ONLY a JSON object mapping the task ID to its integer score. For example:
       dump_id: dumpId,
       recipient: item.recipient || 'unclear',
       intent: item.intent || '',
+      task_type: item.task_type || 'communication',
       relationship_context: item.relationship_context || 'unclear',
       is_actionable: item.is_actionable ? 1 : 0,
       urgency: item.urgency || 3,
@@ -142,11 +144,11 @@ Return ONLY a JSON object mapping the task ID to its integer score. For example:
     // Bulk insert inside a transaction
     const insert = db.prepare(`
       INSERT INTO tasks (
-        id, dump_id, recipient, intent, relationship_context, 
+        id, dump_id, recipient, intent, task_type, relationship_context, 
         is_actionable, urgency, draft, toneLabel, confidence, 
         status, archived, created_at, updated_at
       ) VALUES (
-        @id, @dump_id, @recipient, @intent, @relationship_context, 
+        @id, @dump_id, @recipient, @intent, @task_type, @relationship_context, 
         @is_actionable, @urgency, @draft, @toneLabel, @confidence, 
         @status, @archived, @created_at, @updated_at
       )

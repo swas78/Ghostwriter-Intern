@@ -7,6 +7,7 @@ export interface Task {
   id: string;
   recipient: string;
   intent: string;
+  task_type?: string;
   urgency: number; // 1-5
   status: 'extracting' | 'drafting' | 'drafted' | 'error';
   draft?: string;
@@ -67,6 +68,22 @@ export function TaskCard({ task, onArchive, onRetry, onRefine, onDismiss }: Task
         <span className={`${styles.urgencyBadge} ${urgencyClass}`}>
           {urgencyLabel}
         </span>
+        {task.task_type && task.task_type !== 'communication' && (
+          <span className={styles.typeBadge} style={{
+            marginLeft: '8px', 
+            background: task.task_type === 'meeting' ? 'rgba(155, 89, 182, 0.1)' : 'rgba(46, 204, 113, 0.1)', 
+            color: task.task_type === 'meeting' ? '#8e44ad' : '#27ae60', 
+            padding: '2px 8px', 
+            borderRadius: '12px', 
+            fontSize: '0.8rem', 
+            fontWeight: 600,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}>
+            {task.task_type === 'meeting' ? '📅 Meeting' : '✅ Task'}
+          </span>
+        )}
         {task.isFollowUp && (
           <span className={styles.followUpBadge} style={{ marginLeft: '8px', background: '#3498db', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 600 }}>
             Follow-up

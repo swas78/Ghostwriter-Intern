@@ -58,7 +58,18 @@ export async function POST(req: NextRequest) {
     let retryCount = 0;
     let parseRetries = 0;
 
-    const finalSystemPrompt = `You are Ghostwriter. Write a draft message for the user. Output ONLY raw JSON matching this schema: { "draft": "the message text", "toneLabel": "descriptive label", "confidence": "high|medium|low" }${calibrationBlock}`;
+    let finalSystemPrompt = '';
+    
+    if (item.task_type === 'communication' || !item.task_type) {
+      finalSystemPrompt = `You are Ghostwriter. Write a draft message for the user. Output ONLY raw JSON matching this schema: { "draft": "the message text", "toneLabel": "descriptive label", "confidence": "high|medium|low" }${calibrationBlock}`;
+    } else if (item.task_type === 'chore') {
+      finalSystemPrompt = `You are Ghostwriter. The user has a chore or solo task. Draft a brief step-by-step Action Plan or checklist to help them complete it. Output ONLY raw JSON matching this schema: { "draft": "Action Plan:\\n- step 1\\n- step 2", "toneLabel": "Action Plan", "confidence": "high|medium|low" }`;
+    } else if (item.task_type === 'meeting') {
+      finalSystemPrompt = `You are Ghostwriter. The user has a meeting or appointment. Draft a brief Agenda or prep checklist. Output ONLY raw JSON matching this schema: { "draft": "Meeting Prep:\\n- Goal:\\n- Notes:", "toneLabel": "Meeting Prep", "confidence": "high|medium|low" }`;
+    } else {
+      finalSystemPrompt = `You are Ghostwriter. Draft a brief note or plan for the user's task. Output ONLY raw JSON matching this schema: { "draft": "the note text", "toneLabel": "Note", "confidence": "high|medium|low" }`;
+    }
+    
     _debugCalibration.systemPrompt = finalSystemPrompt;
 
     while (retryCount < 3 && parseRetries < 2) {
@@ -78,8 +89,11 @@ export async function POST(req: NextRequest) {
               {
                 role: 'user',
                 content: refine_instruction
-                  ? `Original Intent: Draft a message to ${item.recipient} about: ${item.intent}. Context: ${item.relationship_context}.\nCurrent Draft: ${item.draft}\nRefinement Instruction: ${refine_instruction}\nPlease refine the Current Draft based on the Refinement Instruction. Ensure it still serves the Original Intent and maintains the appropriate Context.`
-                  : `Draft a message to ${item.recipient} about: ${item.intent}. Context: ${item.relationship_context}.`,
+                  ? `Original Intent: ${item.task_type === 'communication' ? 'Draft a message to ' + item.recipient + ' about' : 'Handle task'}: ${item.intent}. Context: ${item.relationship_context}.
+Current Draft: ${item.draft}
+Refinement Instruction: ${refine_instruction}
+Please refine the Current Draft based on the Refinement Instruction.`
+                  : `${item.task_type === 'communication' || !item.task_type ? 'Draft a message to ' + item.recipient + ' about' : 'Draft a plan/notes for'}: ${item.intent}. Context: ${item.relationship_context}.`,
               }
             ],
             response_format: { type: 'json_object' }
