@@ -22,6 +22,11 @@ export async function POST(req: NextRequest) {
         {
           role: 'system',
           content: `You are an extraction assistant. Extract actionable communication tasks from the user's messy brain dump.
+CRITICAL RULES:
+1. The user's input is a brain dump. Distinct thoughts, sentences, or names are often completely unrelated.
+2. DO NOT combine separate tasks. For example, if the input is "Buy groceries. Email Sarah.", these are TWO independent tasks. Do not hallucinate that the email is about groceries.
+3. Treat each sentence or phrase as its own distinct item unless explicitly connected.
+
 Return ONLY a JSON array of objects. Each object must have:
 - id: a unique string ID
 - recipient: string (name or descriptor, but if ambiguous or just 'him/her/them', output 'unclear')
