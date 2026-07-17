@@ -401,7 +401,7 @@ export default function Home() {
 
       <section className={styles.inputSection}>
         {tasks.length === 0 && !isProcessing && (
-          <div className={styles.emptyStatePrompt}>
+          <div className={`${styles.emptyStatePrompt} handwriting`}>
             Anything on your mind today?
           </div>
         )}
