@@ -63,9 +63,9 @@ export async function POST(req: NextRequest) {
     if (item.task_type === 'communication' || !item.task_type) {
       finalSystemPrompt = `You are Ghostwriter. Write a draft message for the user. Output ONLY raw JSON matching this schema: { "draft": "the message text", "toneLabel": "descriptive label", "confidence": "high|medium|low" }${calibrationBlock}`;
     } else if (item.task_type === 'chore') {
-      finalSystemPrompt = `You are Ghostwriter. The user has a chore or solo task. Draft a brief step-by-step Action Plan or checklist to help them complete it. Output ONLY raw JSON matching this schema: { "draft": "Action Plan:\\n- step 1\\n- step 2", "toneLabel": "Action Plan", "confidence": "high|medium|low" }`;
+      finalSystemPrompt = `You are Ghostwriter. The user has a chore or solo task. Draft a brief step-by-step Action Plan or checklist to help them complete it. Output ONLY raw JSON matching this schema: { "draft": ["Action Plan:", "- step 1", "- step 2"], "toneLabel": "Action Plan", "confidence": "high|medium|low" }`;
     } else if (item.task_type === 'meeting') {
-      finalSystemPrompt = `You are Ghostwriter. The user has a meeting or appointment. Draft a brief Agenda or prep checklist. Output ONLY raw JSON matching this schema: { "draft": "Meeting Prep:\\n- Goal:\\n- Notes:", "toneLabel": "Meeting Prep", "confidence": "high|medium|low" }`;
+      finalSystemPrompt = `You are Ghostwriter. The user has a meeting or appointment. Draft a brief Agenda or prep checklist. Output ONLY raw JSON matching this schema: { "draft": ["Meeting Prep:", "- Goal:", "- Notes:"], "toneLabel": "Meeting Prep", "confidence": "high|medium|low" }`;
     } else {
       finalSystemPrompt = `You are Ghostwriter. Draft a brief note or plan for the user's task. Output ONLY raw JSON matching this schema: { "draft": "the note text", "toneLabel": "Note", "confidence": "high|medium|low" }`;
     }
@@ -118,6 +118,10 @@ Please refine the Current Draft based on the Refinement Instruction.`
 
         if (!draftParsed || !draftParsed.draft) {
           throw new Error("Invalid or missing draft in JSON");
+        }
+        
+        if (Array.isArray(draftParsed.draft)) {
+          draftParsed.draft = draftParsed.draft.join('\n');
         }
         
         break; // Success
